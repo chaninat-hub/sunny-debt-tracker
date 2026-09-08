@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1C1A2E">
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Shopping with Sunny&quot;,&quot;short_name&quot;:&quot;Sunny&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#1C1A2E&quot;,&quot;theme_color&quot;:&quot;#1C1A2E&quot;}">
+<meta name="apple-mobile-web-app-title" content="Sunny">
+<link rel="apple-touch-icon" id="appleIcon">
+<script>
+(function(){
+  var c=document.createElement('canvas');c.width=180;c.height=180;
+  var x=c.getContext('2d');
+  var g=x.createLinearGradient(0,0,0,180);
+  g.addColorStop(0,'#FFD6E0');g.addColorStop(1,'#FFB6C8');
+  x.fillStyle=g;x.fillRect(0,0,180,180);
+  x.fillStyle='#000';
+  x.font='bold 66px Arial,sans-serif';
+  x.textAlign='center';x.textBaseline='middle';
+  x.fillText('meem',90,92);
+  document.getElementById('appleIcon').href=c.toDataURL('image/png');
+})();
+</script>
+<title>Shopping with Sunny — Debt Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1C1A2E;
+    --bg-deep:#151327;
+    --panel:#252140;
+    --paper:#FFF8ED;
+    --paper-line:#E7DCC6;
+    --ink:#2B2640;
+    --ink-soft:#8b83a8;
+    --tiktok:#FF3B5C;
+    --shopee:#FF8A00;
+    --ktc:#2F6FED;
+    --yellow:#FFD23F;
+    --white:#F5F3FF;
+    --danger:#FF5C7A;
+    --good:#3DD68C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(255,138,0,0.08), transparent 40%),
+      radial-gradient(circle at 85% 10%, rgba(47,111,237,0.10), transparent 40%);
+    color:var(--white);
+    font-family:'Sarabun',sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    padding:20px 16px 96px;
+    position:relative;
+  }
+  .mono{font-family:'Space Mono',monospace;}
+
+  /* header */
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:18px;
+  }
+  header.top h1{
+    font-size:21px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:0.2px;
+  }
+  header.top h1 span{color:var(--yellow);}
+  header.top .sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+
+  /* receipt hero */
+  .receipt{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:14px 14px 0 0;
+    padding:22px 20px 26px;
+    position:relative;
+    box-shadow:0 14px 30px -12px rgba(0,0,0,0.55);
+  }
+  .receipt::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-11px; height:22px;
+    background:
+      linear-gradient(-45deg, var(--paper) 9px, transparent 0),
+      linear-gradient(45deg, var(--paper) 9px, transparent 0);
+    background-size:18px 22px;
+    background-position:left bottom;
+    background-repeat:repeat-x;
+  }
+  .receipt .eyebrow{
+    font-size:12px;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:2px;
+  }
+  .receipt .grand{
+    font-size:40px;
+    font-weight:700;
+    line-height:1.1;
+    margin:2px 0 4px;
+  }
+  .receipt .grand small{
+    font-size:16px;
+    font-weight:400;
+    color:var(--ink-soft);
+    margin-left:6px;
+  }
+  .receipt .dashed{
+    border-top:1.5px dashed var(--paper-line);
+    margin:14px 0 10px;
+  }
+  .lineitem{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:6px 0;
+    font-size:14.5px;
+  }
+  .lineitem .name{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .dot{
+    width:9px;height:9px;border-radius:50%;flex:none;
+  }
+  .lineitem .amt{font-size:14.5px;}
+  .receipt-tail{height:16px;}
+
+  /* channel cards */
+  .channels{
+    margin-top:30px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .chcard{
+    background:var(--panel);
+    border-radius:12px;
+    padding:14px 14px 14px 16px;
+    border-left:5px solid transparent;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .chcard .emoji{
+    font-size:22px;
+    width:38px;height:38px;
+    border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,0.06);
+    flex:none;
+  }
+  .chcard .info{flex:1; min-width:0;}
+  .chcard .info .nm{font-size:14px;font-weight:600;}
+  .chcard .info .total{font-size:19px;font-weight:700;}
+  .chcard .info .month{font-size:11.5px;color:var(--ink-soft);}
+  .chcard .quickwrap{display:flex; flex-direction:column; gap:6px; flex:none;}
+  .chcard button.quick{
+    border:none;
+    background:rgba(255,255,255,0.09);
+    color:var(--white);
+    font-family:'Sarabun',sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    padding:7px 10px;
+    border-radius:8px;
+    white-space:nowrap;
+  }
+  .chcard button.quick.pay{
+    background:rgba(61,214,140,0.15);
+    color:var(--good);
+  }
+
+  .section-title{
+    margin:26px 0 12px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+
+  /* tabs content generic */
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* Add view */
+  .segwrap{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .seg{
+    flex:1;
+    padding:12px 6px;
+    border-radius:10px;
+    border:1.5px solid rgba(255,255,255,0.12);
+    background:transparent;
+    color:var(--white);
+    font-family:'Sarabun',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+  .seg .e{font-size:18px;}
+  .seg.active[data-ch="tiktok"]{background:var(--tiktok); border-color:var(--tiktok);}
+  .seg.active[data-ch="shopee"]{background:var(--shopee); border-color:var(--shopee);}
+  .seg.active[data-ch="ktc"]{background:var(--ktc); border-color:var(--ktc);}
+
+  .typewrap{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+  }
+  .typebtn{
+    flex:1;
+    padding:11px 6px;
+    border-radius:10px;
+    border:1.5px solid rgba(255,255,255,0.12);
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:'Sarabun',sans-serif;
+    font-weight:600;
+    font-size:13px;
+  }
+  .typebtn.active[data-type="purchase"]{background:rgba(255,210,63,0.14); border-color:var(--yellow); color:var(--yellow);}
+  .typebtn.active[data-type="payment"]{background:rgba(61,214,140,0.14); border-color:var(--good); color:var(--good);}
+
+  label.field{
+    display:block;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+    font-weight:600;
+  }
+  .field-wrap{margin-bottom:16px;}
+  input[type="number"], input[type="date"], input[type="text"]{
+    width:100%;
+    background:var(--panel);
+    border:1.5px solid rgba(255,255,255,0.10);
+    color:var(--white);
+    border-radius:10px;
+    padding:13px 14px;
+    font-size:16px;
+    font-family:'Space Mono',monospace;
+  }
+  input[type="text"]{font-family:'Sarabun',sans-serif;}
+  input::placeholder{color:var(--ink-soft); font-family:'Sarabun',sans-serif;}
+  input:focus{outline:2px solid var(--yellow); outline-offset:1px;}
+
+  .btn-primary{
+    width:100%;
+    border:none;
+    padding:15px;
+    border-radius:12px;
+    font-family:'Sarabun',sans-serif;
+    font-weight:700;
+    font-size:15.5px;
+    color:#1C1A2E;
+    background:var(--yellow);
+    margin-top:4px;
+  }
+  .btn-primary.payment-mode{background:var(--good);}
+  .btn-primary:active{transform:scale(0.99);}
+
+  details.baseline{
+    margin-top:28px;
+    background:var(--panel);
+    border-radius:12px;
+    padding:4px 16px;
+  }
+  details.baseline summary{
+    padding:14px 0;
+    font-weight:700;
+    font-size:13.5px;
+    color:var(--white);
+    list-style:none;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  details.baseline summary::-webkit-details-marker{display:none;}
+  details.baseline summary .arrow{color:var(--ink-soft); font-size:12px; transition:transform .15s;}
+  details[open] summary .arrow{transform:rotate(90deg);}
+  .baseline-note{font-size:12px; color:var(--ink-soft); margin:0 0 14px; line-height:1.5;}
+  .baseline-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .baseline-row .dot{width:8px;height:8px;}
+  .baseline-row .bl-name{width:60px; font-size:13px; font-weight:600; flex:none;}
+  .baseline-row input{padding:10px 12px; font-size:14px;}
+  .baseline-row button{
+    flex:none;
+    border:none;
+    background:rgba(255,255,255,0.1);
+    color:var(--white);
+    font-family:'Sarabun',sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    padding:10px 12px;
+    border-radius:8px;
+  }
+
+  /* history view */
+  .month-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .month-nav button{
+    border:none;
+    background:var(--panel);
+    color:var(--white);
+    width:38px;height:38px;
+    border-radius:10px;
+    font-size:16px;
+  }
+  .month-nav .mtitle{font-weight:700; font-size:15.5px;}
+
+  .month-summary{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .chip{
+    flex:1;
+    background:var(--panel);
+    border-radius:10px;
+    padding:10px 8px;
+    text-align:center;
+    border-bottom:3px solid transparent;
+  }
+  .chip .lbl{font-size:11px; color:var(--ink-soft); margin-bottom:3px;}
+  .chip .val{font-size:13.5px; font-weight:700;}
+
+  .net-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--panel);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:20px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .net-row .val{font-weight:700; color:var(--white); font-size:14.5px;}
+
+  .day-group{margin-bottom:18px;}
+  .day-group .dlabel{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .entry-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--panel);
+    border-radius:10px;
+    padding:12px 12px;
+    margin-bottom:8px;
+  }
+  .entry-row .dot{flex:none;}
+  .entry-row .mid{flex:1; min-width:0;}
+  .entry-row .mid .ch{font-size:13px; font-weight:600;}
+  .entry-row .mid .note{font-size:11.5px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .entry-row .amt{font-size:14.5px; font-weight:700; flex:none;}
+  .entry-row .amt.purchase{color:var(--white);}
+  .entry-row .amt.payment{color:var(--good);}
+  .entry-row .del{
+    flex:none;
+    border:none;
+    background:transparent;
+    color:var(--danger);
+    font-size:17px;
+    padding:4px 2px;
+  }
+  .empty{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    padding:40px 10px;
+    line-height:1.7;
+  }
+
+  /* bottom nav */
+  nav.tabbar{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    display:flex;
+    justify-content:center;
+  }
+  nav.tabbar .inner{
+    width:100%;
+    max-width:480px;
+    background:var(--bg-deep);
+    display:flex;
+    border-top:1px solid rgba(255,255,255,0.08);
+    padding:8px 10px 10px;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  nav.tabbar button{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--ink-soft);
+    font-family:'Sarabun',sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    padding:6px 0;
+    border-radius:10px;
+  }
+  nav.tabbar button .ic{font-size:19px;}
+  nav.tabbar button.active{color:var(--yellow);}
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:86px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--white);
+    color:var(--ink);
+    padding:10px 18px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:600;
+    opacity:0;
+    transition:opacity .2s, transform .2s;
+    pointer-events:none;
+    white-space:nowrap;
+    z-index:50;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .loading-screen{
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:13px; z-index:100;
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">Loading your data…</div>
+
+<div class="app" id="app" style="display:none;">
+
+  <header class="top">
+    <div>
+      <h1>Shopping with <span>Sunny</span> ☀️</h1>
+      <div class="sub" id="todayLabel"></div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <div class="view active" id="view-home">
+    <div class="receipt">
+      <div class="eyebrow"><span>Total debt</span><span id="homeMonthTag"></span></div>
+      <div class="grand mono" id="grandTotal">0<small>THB</small></div>
+      <div class="dashed"></div>
+      <div id="homeLineItems"></div>
+      <div class="receipt-tail"></div>
+    </div>
+
+    <div class="section-title">By channel</div>
+    <div class="channels" id="homeChannels"></div>
+  </div>
+
+  <!-- ADD -->
+  <div class="view" id="view-add">
+    <div class="section-title" style="margin-top:0;">New entry</div>
+    <div class="segwrap" id="segWrap">
+      <button class="seg" data-ch="tiktok"><span class="e">🎵</span>TikTok</button>
+      <button class="seg" data-ch="shopee"><span class="e">🛍️</span>Shopee</button>
+      <button class="seg" data-ch="ktc"><span class="e">💳</span>KTC</button>
+    </div>
+
+    <div class="typewrap" id="typeWrap">
+      <button class="typebtn" data-type="purchase">➕ New purchase</button>
+      <button class="typebtn" data-type="payment">✅ Payment made</button>
+    </div>
+
+    <div class="field-wrap">
+      <label class="field">Amount (THB)</label>
+      <input type="number" id="inpAmount" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="field-wrap">
+      <label class="field">Date</label>
+      <input type="date" id="inpDate">
+    </div>
+    <div class="field-wrap">
+      <label class="field">Note (optional)</label>
+      <input type="text" id="inpNote" placeholder="e.g. new sneakers">
+    </div>
+    <button class="btn-primary" id="btnSaveEntry">Save entry</button>
+
+    <details class="baseline">
+      <summary>Adjust starting balance <span class="arrow">›</span></summary>
+      <p class="baseline-note">Use this when you first set up the app, or whenever you need to match a channel's balance to your real statement — saving will reset that channel's current total to the number you enter.</p>
+      <div id="baselineRows"></div>
+    </details>
+
+    <details class="baseline">
+      <summary>App icon <span class="arrow">›</span></summary>
+      <p class="baseline-note">Pick any photo from your phone — it becomes the "Sunny" icon on your Home screen. Do this BEFORE "Add to Home Screen" in Safari.</p>
+      <div class="baseline-row" style="gap:10px;">
+        <span class="bl-name" style="width:auto;">Icon</span>
+        <button class="bl-save" id="btnPickIcon" style="flex:1;">Choose image</button>
+        <input type="file" id="iconFile" accept="image/*" style="display:none;">
+        <button class="bl-save" id="btnResetIcon" style="flex:none;">Reset</button>
+      </div>
+      <div id="iconPreview" style="margin-top:10px;"></div>
+    </details>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="view" id="view-history">
+    <div class="section-title" style="margin-top:0;">Monthly history</div>
+    <div class="month-nav">
+      <button id="prevMonth">‹</button>
+      <div class="mtitle" id="monthTitle"></div>
+      <button id="nextMonth">›</button>
+    </div>
+    <div class="month-summary" id="monthSummary"></div>
+    <div class="net-row"><span>Net change this month</span><span class="val mono" id="netVal">0</span></div>
+    <div id="historyList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="tabbar" id="tabbar" style="display:none;">
+  <div class="inner">
+    <button class="tab-btn active" data-view="home"><span class="ic">🧾</span>Home</button>
+    <button class="tab-btn" data-view="add"><span class="ic">➕</span>Add</button>
+    <button class="tab-btn" data-view="history"><span class="ic">📅</span>History</button>
+  </div>
+</nav>
+
+<script>
+(function(){
+  "use strict";
+
+  var CHANNELS = [
+    {id:"tiktok", name:"TikTok", emoji:"🎵", color:"var(--tiktok)"},
+    {id:"shopee", name:"Shopee", emoji:"🛍️", color:"var(--shopee)"},
+    {id:"ktc",    name:"KTC",    emoji:"💳", color:"var(--ktc)"}
+  ];
+  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var STORAGE_KEY = "shopdebt-data-v2";
+
+  var data = { entries: [], baseline: { tiktok:0, shopee:0, ktc:0 } };
+  var selectedChannel = "tiktok";
+  var selectedType = "purchase";
+  var histYear, histMonth; // 0-indexed month
+
+  function todayDate(){
+    var d = new Date();
+    var off = d.getTimezoneOffset();
+    return new Date(d.getTime() - off*60000);
+  }
+  function todayStr(){
+    return todayDate().toISOString().slice(0,10);
+  }
+  function fmtMoney(n){
+    n = Number(n) || 0;
+    var neg = n < 0;
+    n = Math.abs(n);
+    var s = n.toLocaleString('en-US', {minimumFractionDigits: (n % 1 !== 0) ? 2 : 0, maximumFractionDigits:2});
+    return (neg ? "-" : "") + s;
+  }
+  function channelInfo(id){
+    for (var i=0;i<CHANNELS.length;i++){ if(CHANNELS[i].id===id) return CHANNELS[i]; }
+    return CHANNELS[0];
+  }
+  function uid(){
+    return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+  function signedAmount(e){
+    var a = Number(e.amount)||0;
+    return e.type === "payment" ? -a : a;
+  }
+
+  // ---------- storage ----------
+  var store = {
+    hasWebView: typeof window.storage !== "undefined" && window.storage && typeof window.storage.get === "function",
+    async get(key){
+      if (this.hasWebView){
+        try{
+          var res = await window.storage.get(key, false);
+          return { value: (res && res.value) ? res.value : null };
+        }catch(e){ /* fall through to localStorage */ }
+      }
+      return { value: localStorage.getItem(key) || null };
+    },
+    async set(key, value){
+      if (this.hasWebView){
+        try{
+          await window.storage.set(key, value, false);
+          return;
+        }catch(e){ /* fall through to localStorage */ }
+      }
+      localStorage.setItem(key, value);
+    }
+  };
+  async function loadData(){
+    try{
+      var res = await store.get(STORAGE_KEY);
+      if (res && res.value){
+        var parsed = JSON.parse(res.value);
+        if (parsed && typeof parsed === "object"){
+          data.entries = Array.isArray(parsed.entries) ? parsed.entries : [];
+          data.entries.forEach(function(e){ if(!e.type) e.type = "purchase"; });
+          data.baseline = parsed.baseline || {tiktok:0, shopee:0, ktc:0};
+          CHANNELS.forEach(function(c){ if (typeof data.baseline[c.id] !== "number") data.baseline[c.id]=0; });
+        }
+      }
+    }catch(e){
+      // key not found or error -> use defaults
+    }
+  }
+  async function saveData(){
+    try{
+      await store.set(STORAGE_KEY, JSON.stringify(data));
+    }catch(e){
+      showToast("Save failed — please try again");
+      console.error("storage error", e);
+    }
+  }
+
+  // ---------- computed ----------
+  function channelTotal(id){
+    var sum = data.baseline[id] || 0;
+    data.entries.forEach(function(e){ if(e.channel===id) sum += signedAmount(e); });
+    return sum;
+  }
+  function grandTotal(){
+    var t = 0;
+    CHANNELS.forEach(function(c){ t += channelTotal(c.id); });
+    return t;
+  }
+  function monthAddedForChannel(id, year, month){
+    var sum = 0;
+    data.entries.forEach(function(e){
+      var d = new Date(e.date+"T00:00:00");
+      if (e.channel===id && e.type==="purchase" && d.getFullYear()===year && d.getMonth()===month) sum += Number(e.amount)||0;
+    });
+    return sum;
+  }
+  function monthNetForChannel(id, year, month){
+    var sum = 0;
+    data.entries.forEach(function(e){
+      var d = new Date(e.date+"T00:00:00");
+      if (e.channel===id && d.getFullYear()===year && d.getMonth()===month) sum += signedAmount(e);
+    });
+    return sum;
+  }
+
+  // ---------- toast ----------
+  var toastTimer = null;
+  function showToast(msg){
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 1800);
+  }
+
+  // ---------- render: home ----------
+  function renderHome(){
+    document.getElementById("grandTotal").innerHTML = fmtMoney(grandTotal()) + "<small>THB</small>";
+    var now = new Date();
+    document.getElementById("homeMonthTag").textContent = MONTHS_SHORT[now.getMonth()] + " " + now.getFullYear();
+
+    var lineHtml = "";
+    CHANNELS.forEach(function(c){
+      lineHtml += '<div class="lineitem"><div class="name"><span class="dot" style="background:'+c.color+'"></span>'+c.name+'</div><div class="amt mono">'+fmtMoney(channelTotal(c.id))+'</div></div>';
+    });
+    document.getElementById("homeLineItems").innerHTML = lineHtml;
+
+    var now2 = new Date();
+    var cardsHtml = "";
+    CHANNELS.forEach(function(c){
+      var added = monthAddedForChannel(c.id, now2.getFullYear(), now2.getMonth());
+      cardsHtml += ''+
+        '<div class="chcard" style="border-left-color:'+c.color+'">'+
+          '<div class="emoji">'+c.emoji+'</div>'+
+          '<div class="info">'+
+            '<div class="nm">'+c.name+'</div>'+
+            '<div class="total mono">'+fmtMoney(channelTotal(c.id))+' <span style="font-size:11px;color:var(--ink-soft);font-family:Sarabun,sans-serif;font-weight:400;">THB</span></div>'+
+            '<div class="month">+'+fmtMoney(added)+' THB this month</div>'+
+          '</div>'+
+          '<div class="quickwrap">'+
+            '<button class="quick buy" data-ch="'+c.id+'" data-type="purchase">+ Purchase</button>'+
+            '<button class="quick pay" data-ch="'+c.id+'" data-type="payment">Payment</button>'+
+          '</div>'+
+        '</div>';
+    });
+    document.getElementById("homeChannels").innerHTML = cardsHtml;
+
+    Array.prototype.forEach.call(document.querySelectorAll("#homeChannels .quick"), function(btn){
+      btn.addEventListener("click", function(){
+        selectedChannel = btn.getAttribute("data-ch");
+        selectedType = btn.getAttribute("data-type");
+        switchView("add");
+        renderAddSegments();
+        renderTypeButtons();
+      });
+    });
+  }
+
+  // ---------- render: add ----------
+  function renderAddSegments(){
+    Array.prototype.forEach.call(document.querySelectorAll("#segWrap .seg"), function(btn){
+      btn.classList.toggle("active", btn.getAttribute("data-ch") === selectedChannel);
+    });
+  }
+  function renderTypeButtons(){
+    Array.prototype.forEach.call(document.querySelectorAll("#typeWrap .typebtn"), function(btn){
+      btn.classList.toggle("active", btn.getAttribute("data-type") === selectedType);
+    });
+    var saveBtn = document.getElementById("btnSaveEntry");
+    if (selectedType === "payment"){
+      saveBtn.textContent = "Save payment";
+      saveBtn.classList.add("payment-mode");
+    } else {
+      saveBtn.textContent = "Save entry";
+      saveBtn.classList.remove("payment-mode");
+    }
+  }
+  function renderBaselineRows(){
+    var html = "";
+    CHANNELS.forEach(function(c){
+      html += ''+
+        '<div class="baseline-row">'+
+          '<span class="dot" style="background:'+c.color+'"></span>'+
+          '<span class="bl-name">'+c.name+'</span>'+
+          '<input type="number" step="0.01" inputmode="decimal" id="bl-'+c.id+'" value="'+channelTotal(c.id)+'">'+
+          '<button data-ch="'+c.id+'" class="bl-save">Save</button>'+
+        '</div>';
+    });
+    document.getElementById("baselineRows").innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll(".bl-save"), function(btn){
+      btn.addEventListener("click", function(){
+        var ch = btn.getAttribute("data-ch");
+        var input = document.getElementById("bl-"+ch);
+        var newTotal = parseFloat(input.value);
+        if (isNaN(newTotal)){ showToast("Please enter a valid number"); return; }
+        var entriesSum = 0;
+        data.entries.forEach(function(e){ if(e.channel===ch) entriesSum += signedAmount(e); });
+        data.baseline[ch] = newTotal - entriesSum;
+        saveData().then(function(){
+          showToast(channelInfo(ch).name+" balance updated");
+          renderAll();
+        });
+      });
+    });
+  }
+  function renderAddView(){
+    renderAddSegments();
+    renderTypeButtons();
+    renderBaselineRows();
+  }
+
+  // ---------- render: history ----------
+  function monthTitleText(){
+    return MONTHS[histMonth] + " " + histYear;
+  }
+  function renderHistory(){
+    document.getElementById("monthTitle").textContent = monthTitleText();
+
+    var chipHtml = "";
+    var net = 0;
+    CHANNELS.forEach(function(c){
+      var v = monthAddedForChannel(c.id, histYear, histMonth);
+      net += monthNetForChannel(c.id, histYear, histMonth);
+      chipHtml += '<div class="chip" style="border-bottom-color:'+c.color+'"><div class="lbl">'+c.name+'</div><div class="val mono">+'+fmtMoney(v)+'</div></div>';
+    });
+    document.getElementById("monthSummary").innerHTML = chipHtml;
+    document.getElementById("netVal").textContent = (net>0?"+":"") + fmtMoney(net) + " THB";
+
+    var monthEntries = data.entries.filter(function(e){
+      var d = new Date(e.date+"T00:00:00");
+      return d.getFullYear()===histYear && d.getMonth()===histMonth;
+    }).sort(function(a,b){ return b.date.localeCompare(a.date) || (b.createdAt||0)-(a.createdAt||0); });
+
+    var listEl = document.getElementById("historyList");
+    if (monthEntries.length === 0){
+      listEl.innerHTML = '<div class="empty">No entries yet this month.<br>Tap "Add" below to log a purchase or payment.</div>';
+      return;
+    }
+
+    var byDate = {};
+    var order = [];
+    monthEntries.forEach(function(e){
+      if (!byDate[e.date]){ byDate[e.date] = []; order.push(e.date); }
+      byDate[e.date].push(e);
+    });
+
+    var html = "";
+    order.forEach(function(dateStr){
+      var d = new Date(dateStr+"T00:00:00");
+      var label = MONTHS_SHORT[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+      html += '<div class="day-group"><div class="dlabel">'+label+'</div>';
+      byDate[dateStr].forEach(function(e){
+        var c = channelInfo(e.channel);
+        var isPay = e.type === "payment";
+        html += ''+
+          '<div class="entry-row">'+
+            '<span class="dot" style="background:'+c.color+'"></span>'+
+            '<div class="mid"><div class="ch">'+c.name+(isPay ? ' · payment' : '')+'</div>'+(e.note ? '<div class="note">'+escapeHtml(e.note)+'</div>' : '')+'</div>'+
+            '<div class="amt mono '+(isPay?'payment':'purchase')+'">'+(isPay?'-':'+')+fmtMoney(e.amount)+'</div>'+
+            '<button class="del" data-id="'+e.id+'">✕</button>'+
+          '</div>';
+      });
+      html += '</div>';
+    });
+    listEl.innerHTML = html;
+
+    Array.prototype.forEach.call(listEl.querySelectorAll(".del"), function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-id");
+        data.entries = data.entries.filter(function(e){ return e.id !== id; });
+        saveData().then(function(){
+          showToast("Entry deleted");
+          renderAll();
+        });
+      });
+    });
+  }
+  function escapeHtml(s){
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ---------- view switching ----------
+  function switchView(name){
+    Array.prototype.forEach.call(document.querySelectorAll(".view"), function(v){ v.classList.remove("active"); });
+    document.getElementById("view-"+name).classList.add("active");
+    Array.prototype.forEach.call(document.querySelectorAll(".tab-btn"), function(b){
+      b.classList.toggle("active", b.getAttribute("data-view")===name);
+    });
+    window.scrollTo(0,0);
+  }
+
+  function renderAll(){
+    renderHome();
+    renderAddView();
+    renderHistory();
+  }
+
+  // ---------- init ----------
+  async function init(){
+    await loadData();
+
+    var now = todayDate();
+    histYear = now.getFullYear();
+    histMonth = now.getMonth();
+
+    document.getElementById("inpDate").value = todayStr();
+    document.getElementById("todayLabel").textContent = MONTHS[now.getMonth()]+" "+now.getDate()+", "+now.getFullYear();
+
+    Array.prototype.forEach.call(document.querySelectorAll(".tab-btn"), function(btn){
+      btn.addEventListener("click", function(){ switchView(btn.getAttribute("data-view")); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#segWrap .seg"), function(btn){
+      btn.addEventListener("click", function(){
+        selectedChannel = btn.getAttribute("data-ch");
+        renderAddSegments();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#typeWrap .typebtn"), function(btn){
+      btn.addEventListener("click", function(){
+        selectedType = btn.getAttribute("data-type");
+        renderTypeButtons();
+      });
+    });
+    document.getElementById("btnSaveEntry").addEventListener("click", async function(){
+      var amountVal = parseFloat(document.getElementById("inpAmount").value);
+      var dateVal = document.getElementById("inpDate").value;
+      var noteVal = document.getElementById("inpNote").value.trim();
+      if (isNaN(amountVal) || amountVal <= 0){ showToast("Please enter a valid amount"); return; }
+      if (!dateVal){ showToast("Please choose a date"); return; }
+      data.entries.push({
+        id: uid(),
+        channel: selectedChannel,
+        type: selectedType,
+        amount: amountVal,
+        date: dateVal,
+        note: noteVal,
+        createdAt: Date.now()
+      });
+      await saveData();
+      document.getElementById("inpAmount").value = "";
+      document.getElementById("inpNote").value = "";
+      showToast((selectedType==="payment" ? "Payment" : "Purchase")+" saved for "+channelInfo(selectedChannel).name);
+      renderAll();
+      switchView("home");
+    });
+    document.getElementById("prevMonth").addEventListener("click", function(){
+      histMonth--; if(histMonth<0){ histMonth=11; histYear--; }
+      renderHistory();
+    });
+    document.getElementById("nextMonth").addEventListener("click", function(){
+      histMonth++; if(histMonth>11){ histMonth=0; histYear++; }
+      renderHistory();
+    });
+
+    renderAll();
+
+    document.getElementById("loadingScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("tabbar").style.display = "flex";
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
