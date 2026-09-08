@@ -12,16 +12,21 @@
 <link rel="apple-touch-icon" id="appleIcon">
 <script>
 (function(){
-  var c=document.createElement('canvas');c.width=180;c.height=180;
-  var x=c.getContext('2d');
-  var g=x.createLinearGradient(0,0,0,180);
-  g.addColorStop(0,'#FFD6E0');g.addColorStop(1,'#FFB6C8');
-  x.fillStyle=g;x.fillRect(0,0,180,180);
-  x.fillStyle='#000';
-  x.font='bold 66px Arial,sans-serif';
-  x.textAlign='center';x.textBaseline='middle';
-  x.fillText('meem',90,92);
-  document.getElementById('appleIcon').href=c.toDataURL('image/png');
+  var icon=document.getElementById('appleIcon');
+  function draw(size, weight){
+    var c=document.createElement('canvas');c.width=180;c.height=180;
+    var x=c.getContext('2d');
+    var g=x.createLinearGradient(0,0,0,180);
+    g.addColorStop(0,'#FFD6E0');g.addColorStop(1,'#FFB6C8');
+    x.fillStyle=g;x.fillRect(0,0,180,180);
+    x.fillStyle='#FFFFFF';
+    x.font=weight+' '+size+'px "Sarabun",Arial,sans-serif';
+    x.textAlign='center';x.textBaseline='middle';
+    x.fillText('meem',90,94);
+    icon.href=c.toDataURL('image/png');
+  }
+  draw(44,'600');
+  if (document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ draw(44,'600'); }); }
 })();
 </script>
 <title>Shopping with Sunny — Debt Tracker</title>
