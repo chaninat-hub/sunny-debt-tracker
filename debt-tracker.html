@@ -19,14 +19,31 @@
     var g=x.createLinearGradient(0,0,0,180);
     g.addColorStop(0,'#FFD6E0');g.addColorStop(1,'#FFB6C8');
     x.fillStyle=g;x.fillRect(0,0,180,180);
-    x.fillStyle='#FFFFFF';
-    x.font=weight+' '+size+'px "Sarabun",Arial,sans-serif';
+    var sparkles=[[28,30,7,1],[152,40,5,0.9],[150,150,6,0.85],[26,152,5,0.8],[90,22,4,0.7],[160,92,4,0.6],[20,92,4,0.6],[90,160,5,0.7]];
+    sparkles.forEach(function(s){
+      x.save();x.translate(s[0],s[1]);x.fillStyle='#FFFFFF';x.globalAlpha=s[3];
+      var r=s[2];x.beginPath();x.moveTo(0,-r);x.lineTo(r*0.28,-r*0.28);x.lineTo(r,0);x.lineTo(r*0.28,r*0.28);x.lineTo(0,r);x.lineTo(-r*0.28,r*0.28);x.lineTo(-r,0);x.lineTo(-r*0.28,-r*0.28);x.closePath();x.fill();x.restore();
+    });
+    x.globalAlpha=1;
+    var hearts=[[46,150,9],[136,150,9],[40,46,7],[140,46,7]];
+    hearts.forEach(function(h){
+      var px=h[0],py=h[1],sz=h[2];
+      x.save();x.fillStyle='#FFFFFF';x.globalAlpha=0.55;
+      x.beginPath();x.moveTo(px,py+sz*0.35);
+      x.bezierCurveTo(px,py-sz*0.4,px-sz,py-sz*0.4,px-sz,py);
+      x.bezierCurveTo(px-sz,py+sz*0.55,px,py+sz,px,py+sz*1.1);
+      x.bezierCurveTo(px,py+sz,px+sz,py+sz*0.55,px+sz,py);
+      x.bezierCurveTo(px+sz,py-sz*0.4,px,py-sz*0.4,px,py+sz*0.35);
+      x.fill();x.restore();
+    });
+    x.globalAlpha=1;
+    x.fillStyle='#FFFFFF';x.font=weight+' '+size+'px "Sarabun",Arial,sans-serif';
     x.textAlign='center';x.textBaseline='middle';
-    x.fillText('meem',90,94);
+    x.fillText('meem',90,96);
     icon.href=c.toDataURL('image/png');
   }
-  draw(44,'600');
-  if (document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ draw(44,'600'); }); }
+  draw(40,'600');
+  if (document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ draw(40,'600'); }); }
 })();
 </script>
 <title>Shopping with Sunny — Debt Tracker</title>
