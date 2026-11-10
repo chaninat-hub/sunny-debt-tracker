@@ -164,9 +164,10 @@
     padding:14px 14px 14px 16px;
     border-left:5px solid transparent;
     display:flex;
-    align-items:center;
-    gap:12px;
+    flex-direction:column;
+    gap:10px;
   }
+  .chrow{display:flex; align-items:center; gap:12px; width:100%;}
   .chcard .emoji{
     font-size:22px;
     width:38px;height:38px;
@@ -195,6 +196,19 @@
     background:rgba(61,214,140,0.15);
     color:var(--good);
   }
+  .chbar-meta{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:11px; color:var(--ink-soft); margin-bottom:5px;
+  }
+  .chbar-meta .rem{font-weight:700; color:var(--white);}
+  .chbar-meta .rem.over{color:var(--danger);}
+  .chbar{height:6px; border-radius:4px; background:rgba(255,255,255,0.10); overflow:hidden;}
+  .chbar > i{display:block; height:100%; border-radius:4px;}
+
+  .receipt .grand-sub{
+    font-size:12px; color:var(--ink-soft); margin-top:0; line-height:1.5;
+  }
+  .receipt .grand-sub b{color:var(--ink); font-weight:600;}
 
   .section-title{
     margin:26px 0 12px;
@@ -494,6 +508,7 @@
     <div class="receipt">
       <div class="eyebrow"><span>Total debt</span><span id="homeMonthTag"></span></div>
       <div class="grand mono" id="grandTotal">0<small>THB</small></div>
+      <div class="grand-sub" id="homeLimitSub"></div>
       <div class="dashed"></div>
       <div id="homeLineItems"></div>
       <div class="receipt-tail"></div>
@@ -535,6 +550,12 @@
       <summary>Adjust starting balance <span class="arrow">›</span></summary>
       <p class="baseline-note">Use this when you first set up the app, or whenever you need to match a channel's balance to your real statement — saving will reset that channel's current total to the number you enter.</p>
       <div id="baselineRows"></div>
+    </details>
+
+    <details class="baseline">
+      <summary>วงเงินใช้ได้ (Credit limits) <span class="arrow">›</span></summary>
+      <p class="baseline-note">ตั้งวงเงินเครดิตของแต่ละช่องทาง — แอปจะแสดงยอดที่ใช้ไปและยอดที่เหลือใช้ได้บนหน้าหลัก</p>
+      <div id="limitRows"></div>
     </details>
 
     <details class="baseline">
@@ -588,7 +609,8 @@
   var MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var STORAGE_KEY = "shopdebt-data-v2";
 
-  var data = { entries: [], baseline: { tiktok:0, shopee:0, ktc:0 } };
+  var DEFAULT_LIMITS = { tiktok:21000, shopee:50000, ktc:30000 };
+  var data = { entries: [], baseline: { tiktok:0, shopee:0, ktc:0 }, limits: { tiktok:21000, shopee:50000, ktc:30000 } };
   var selectedChannel = "tiktok";
   var selectedType = "purchase";
   var histYear, histMonth; // 0-indexed month
@@ -652,6 +674,8 @@
           data.entries.forEach(function(e){ if(!e.type) e.type = "purchase"; });
           data.baseline = parsed.baseline || {tiktok:0, shopee:0, ktc:0};
           CHANNELS.forEach(function(c){ if (typeof data.baseline[c.id] !== "number") data.baseline[c.id]=0; });
+          data.limits = parsed.limits || {};
+          CHANNELS.forEach(function(c){ if (typeof data.limits[c.id] !== "number") data.limits[c.id] = DEFAULT_LIMITS[c.id]; });
         }
       }
     }catch(e){
@@ -677,6 +701,22 @@
     var t = 0;
     CHANNELS.forEach(function(c){ t += channelTotal(c.id); });
     return t;
+  }
+  function limitOf(id){
+    var v = data.limits[id];
+    if (typeof v !== "number") v = DEFAULT_LIMITS[id] || 0;
+    return v;
+  }
+  function remainingOf(id){
+    return limitOf(id) - channelTotal(id);
+  }
+  function grandLimit(){
+    var t = 0;
+    CHANNELS.forEach(function(c){ t += limitOf(c.id); });
+    return t;
+  }
+  function grandRemaining(){
+    return grandLimit() - grandTotal();
   }
   function monthAddedForChannel(id, year, month){
     var sum = 0;
@@ -708,6 +748,9 @@
   // ---------- render: home ----------
   function renderHome(){
     document.getElementById("grandTotal").innerHTML = fmtMoney(grandTotal()) + "<small>THB</small>";
+    var rem = grandRemaining();
+    document.getElementById("homeLimitSub").innerHTML =
+      "วงเงินรวม <b>"+fmtMoney(grandLimit())+" THB</b> · เหลือใช้ <b style=\"color:"+(rem<0?"var(--danger)":"var(--good)")+"\">"+fmtMoney(rem)+" THB</b>";
     var now = new Date();
     document.getElementById("homeMonthTag").textContent = MONTHS_SHORT[now.getMonth()] + " " + now.getFullYear();
 
@@ -721,17 +764,31 @@
     var cardsHtml = "";
     CHANNELS.forEach(function(c){
       var added = monthAddedForChannel(c.id, now2.getFullYear(), now2.getMonth());
+      var used = channelTotal(c.id);
+      var lim = limitOf(c.id);
+      var rem = lim - used;
+      var pct = lim > 0 ? Math.min(100, Math.round((used / lim) * 100)) : 0;
+      var over = rem < 0;
       cardsHtml += ''+
         '<div class="chcard" style="border-left-color:'+c.color+'">'+
-          '<div class="emoji">'+c.emoji+'</div>'+
-          '<div class="info">'+
-            '<div class="nm">'+c.name+'</div>'+
-            '<div class="total mono">'+fmtMoney(channelTotal(c.id))+' <span style="font-size:11px;color:var(--ink-soft);font-family:Sarabun,sans-serif;font-weight:400;">THB</span></div>'+
-            '<div class="month">+'+fmtMoney(added)+' THB this month</div>'+
+          '<div class="chrow">'+
+            '<div class="emoji">'+c.emoji+'</div>'+
+            '<div class="info">'+
+              '<div class="nm">'+c.name+'</div>'+
+              '<div class="total mono">'+fmtMoney(used)+' <span style="font-size:11px;color:var(--ink-soft);font-family:Sarabun,sans-serif;font-weight:400;">THB</span></div>'+
+              '<div class="month">+'+fmtMoney(added)+' THB this month</div>'+
+            '</div>'+
+            '<div class="quickwrap">'+
+              '<button class="quick buy" data-ch="'+c.id+'" data-type="purchase">+ Purchase</button>'+
+              '<button class="quick pay" data-ch="'+c.id+'" data-type="payment">Payment</button>'+
+            '</div>'+
           '</div>'+
-          '<div class="quickwrap">'+
-            '<button class="quick buy" data-ch="'+c.id+'" data-type="purchase">+ Purchase</button>'+
-            '<button class="quick pay" data-ch="'+c.id+'" data-type="payment">Payment</button>'+
+          '<div>'+
+            '<div class="chbar-meta">'+
+              '<span>วงเงิน '+fmtMoney(lim)+' · ใช้ไป '+fmtMoney(used)+'</span>'+
+              '<span class="rem'+(over?' over':'')+'">'+(over?'เกิน ':'เหลือ ')+fmtMoney(Math.abs(rem))+'</span>'+
+            '</div>'+
+            '<div class="chbar"><i style="width:'+pct+'%;background:'+(over?'var(--danger)':c.color)+'"></i></div>'+
           '</div>'+
         '</div>';
     });
@@ -795,10 +852,37 @@
       });
     });
   }
+  function renderLimitRows(){
+    var html = "";
+    CHANNELS.forEach(function(c){
+      html += ''+
+        '<div class="baseline-row">'+
+          '<span class="dot" style="background:'+c.color+'"></span>'+
+          '<span class="bl-name">'+c.name+'</span>'+
+          '<input type="number" step="0.01" inputmode="decimal" id="lim-'+c.id+'" value="'+limitOf(c.id)+'">'+
+          '<button data-ch="'+c.id+'" class="lim-save">Save</button>'+
+        '</div>';
+    });
+    document.getElementById("limitRows").innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll(".lim-save"), function(btn){
+      btn.addEventListener("click", function(){
+        var ch = btn.getAttribute("data-ch");
+        var input = document.getElementById("lim-"+ch);
+        var v = parseFloat(input.value);
+        if (isNaN(v) || v < 0){ showToast("Please enter a valid number"); return; }
+        data.limits[ch] = v;
+        saveData().then(function(){
+          showToast(channelInfo(ch).name+" limit updated");
+          renderAll();
+        });
+      });
+    });
+  }
   function renderAddView(){
     renderAddSegments();
     renderTypeButtons();
     renderBaselineRows();
+    renderLimitRows();
   }
 
   // ---------- render: history ----------
